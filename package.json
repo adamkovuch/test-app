@@ -1,0 +1,16 @@
+{
+  "name": "stressboom",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "express": "^4.17.3",
+    "superagent": "^0.16.0"
+  }
+}
