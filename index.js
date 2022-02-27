@@ -76,7 +76,7 @@ const selfTest = () => {
 
     got.get(url)
         .then(function() {
-            console.log('selftest OK');
+            console.log(`selftest OK.  ${process.env.HOST}:${process.env.PORT}`);
         })
         .catch(function() {
             console.error('selftest error');
@@ -85,3 +85,4 @@ const selfTest = () => {
 
 selfTest();
 setInterval(selfTest, 300000);
+
