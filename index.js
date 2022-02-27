@@ -76,7 +76,7 @@ const selfTest = () => {
 
     got.get(url)
         .then(function() {
-            console.log(`selftest OK.  ${process.env.HOST}:${process.env.PORT}`);
+            console.log(`selftest OK.  ${JSON.stringify(process.env)}`);
         })
         .catch(function() {
             console.error('selftest error');
