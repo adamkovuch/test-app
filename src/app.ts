@@ -2,23 +2,25 @@ import express from "express";
 import bodyParser from "body-parser";
 import { Stats } from "./stats";
 import { Attacker } from "./attacker";
+import cors from "cors";
 
 // Create Express server
 const app = express();
 const stats = new Stats();
 const attacker = new Attacker(stats);
 
+
 // Express configuration
-app.set("port", process.env.PORT || 3000);
+app.set("port", process.env.PORT || 8080);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(cors({origin: '*',}));
 app.get('/', (req, res) => {
     if(stats.isRun) {
         res.status(200).send({
             target: stats.target,
             success: stats.success,
-            errors: stats.errors,
+            error: stats.error,
             loop: stats.loop
         });
     } else {

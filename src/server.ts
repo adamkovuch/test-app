@@ -28,7 +28,15 @@ const selfTest = () => {
         superagent.get(process.env.URL).end(err => err ? console.log('SelfTest error, '+err) : console.log('SelfTest OK'));
 
         if(process.env.CMD_URL) {
-            superagent.post(process.env.CMD_URL).send({ url: process.env.URL });
+            const url = `${process.env.CMD_URL}api/control/register`;
+            console.log(`Trying to register on ${url}`);
+            superagent.post(url).send({ url: process.env.URL }).end((err) => {
+                if(err) {
+                    console.error(err);
+                } else {
+                    console.log('bot registered');
+                }
+            });
         }
     }
 }

