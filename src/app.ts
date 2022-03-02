@@ -34,12 +34,12 @@ app.post('/attack', (req, res) => {
         return;
     }
     attacker.run(req.body.target, req.body.concurrency || 100, req.body.interval || 1000);
-    res.sendStatus(201);
+    res.status(201).send({success: true});
 });
 
 app.delete('/attack', (req, res) => {
     attacker.stop();
-    res.sendStatus(200);
+    res.status(200).send({success: true});
 });
 
 export default app;
