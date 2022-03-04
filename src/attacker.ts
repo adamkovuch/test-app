@@ -22,11 +22,15 @@ export class Attacker {
     }
 
     private attack(target: string) {
-        superagent
-            .get(target)
-            .set('Cache-Control', 'no-cache')
-            .set('Keep-Alive', 'timeout=30, max=1')
-            .timeout(5000)
-            .end((err) => err ? this.stats.error += 1 : this.stats.success += 1);
+        try{
+            superagent
+                .get(target)
+                .set('Cache-Control', 'no-cache')
+                .set('Keep-Alive', 'timeout=30, max=1')
+                .timeout(5000)
+                .end((err) => err ? this.stats.error += 1 : this.stats.success += 1);
+        } catch(error) {
+            console.error(error);
+        }
     }
 }
