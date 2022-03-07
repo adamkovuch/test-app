@@ -9,7 +9,7 @@ export class Attacker {
         this.stats.target = target;
         this.instance = setInterval(() => {
             for(let i = 0; i < concurrency; i += 1) {
-                this.attack(target);
+                this.attack(target, interval);
             }
             this.stats.loop += 1;
             console.log(`Target: ${this.stats.target} | Loop: ${this.stats.loop} | Success: ${this.stats.success} | Error: ${this.stats.error}`);
