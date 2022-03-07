@@ -1,13 +1,11 @@
 import errorHandler from "errorhandler";
 import app from "./app";
-import superagent from "superagent";
+import request from "request";
 
 /**
  * Error Handler. Provides full stack
  */
-if (process.env.NODE_ENV === "development") {
-    app.use(errorHandler());
-}
+app.use(errorHandler());
 
 
 /**
@@ -25,7 +23,7 @@ const server = app.listen(app.get("port"), () => {
 
 const selfTest = () => {
     if(process.env.URL) {
-        superagent.get(process.env.URL).end(err => err ? console.log('SelfTest error, '+err) : console.log('SelfTest OK'));
+        request.get({url: process.env.URL}, (err) => err ? console.log('SelfTest error, '+err) : console.log('SelfTest OK'));
     }
 }
 

