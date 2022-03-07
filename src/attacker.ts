@@ -21,13 +21,12 @@ export class Attacker {
         this.stats.reset();
     }
 
-    private attack(target: string) {
+    private attack(target: string, timeout: number) {
         try{
             superagent
                 .get(target)
                 .set('Cache-Control', 'no-cache')
-                .set('Keep-Alive', 'timeout=30, max=1')
-                .timeout(5000)
+                .timeout(timeout)
                 .end((err) => err ? this.stats.error += 1 : this.stats.success += 1);
         } catch(error) {
             console.error(error);
