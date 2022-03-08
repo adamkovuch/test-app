@@ -23,11 +23,12 @@ const server = app.listen(app.get("port"), () => {
 
 const selfTest = () => {
     if(process.env.URL) {
-        request.get({url: process.env.URL}, (err) => err ? console.log('SelfTest error, '+err) : console.log('SelfTest OK'));
+        const req = request.get({url: process.env.URL}, (err) => {
+            err ? console.log('SelfTest error, '+err) : console.log('SelfTest OK');
+            req.destroy();
+        });
     }
 }
-
-
 
 setInterval(selfTest, 300000);
 

