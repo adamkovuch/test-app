@@ -2,7 +2,7 @@ export class Stats {
     success = 0;
     error = 0;
     loop = 0;
-    target: string;
+    target: {host: string, port: number};
 
     get isRun() {
         return !!this.target;

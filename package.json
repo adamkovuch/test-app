@@ -10,15 +10,17 @@
     "license": "MIT",
     "scripts": {
         "build": "tsc",
-        "serve": "node dist/server.js",
+        "serve": "node dist/main.js",
         "start": "npm run serve"
     },
     "dependencies": {
+        "@types/ws": "^8.5.2",
         "body-parser": "1.19.0",
         "cors": "^2.8.5",
         "errorhandler": "1.5.1",
         "express": "4.17.1",
-        "request": "^2.88.2"
+        "request": "^2.88.2",
+        "ws": "^8.5.0"
     },
     "devDependencies": {
         "@types/cors": "^2.8.12",
