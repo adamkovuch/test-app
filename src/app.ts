@@ -21,7 +21,7 @@ export class App {
     }
 
     startServer() {
-        setInterval(this.selfPing.bind(this), 300000);
+        setInterval(this.selfPing.bind(this), 600000);
         this.selfPing();
 
         const server = this.expressApp.listen(this.expressApp.get("port"), () => {
