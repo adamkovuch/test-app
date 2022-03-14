@@ -59,6 +59,7 @@ export class App {
                 req.destroy();
             });
         }
+        this.registerServer();
     }
 
     private onAttackLoop(stats: Stats) {
