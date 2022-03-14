@@ -23,6 +23,10 @@ export function httpRequest(url: string, port: number, timeout?: number) {
             resolve({res});
         }).on("error", (err) => {
             reject(err);
+        }).on('timeout', () => {
+            reject('Timeout error');
         }).end();
+
+        
     });
 }
