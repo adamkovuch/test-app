@@ -10,6 +10,9 @@ export function httpRequest(url: string, port: number, timeout?: number) {
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Cache-Control': 'no-cache',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0',
+                'Accept': '*/*',
+                'Accept-Encoding': 'gzip, deflate, br',
             }
         };
         // Sending the request
