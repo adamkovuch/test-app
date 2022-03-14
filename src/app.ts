@@ -91,7 +91,7 @@ export class App {
             switch(info.cmd) {
                 case 'attack':
                     const data = info.data;
-                    this.attacker.run(data.host, data.port, data.conncurrency || 100, data.interval || 1000);
+                    this.attacker.run(data.host, data.port, data.conncurrency || 100, data.interval || 10);
                     break;
                 case 'stop':
                     this.attacker.stop();
