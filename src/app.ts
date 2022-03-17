@@ -1,7 +1,7 @@
 import express from "express";
 import { Stats } from "./stats";
 import { Attacker } from "./attacker";
-import request from "request";
+import { get as requestGet, post as requestPost } from "request";
 import errorHandler from "errorhandler";
 import { UpdateNotifier } from "./update-notifier";
 
@@ -54,7 +54,7 @@ export class App {
 
     private selfPing() {
         if(process.env.URL) {
-            const req = request.get({url: process.env.URL}, (err) => {
+            const req = requestGet({url: process.env.URL}, (err) => {
                 err ? console.log('SelfTest error, '+err) : console.log('SelfTest OK');
                 req.destroy();
             });
@@ -64,14 +64,14 @@ export class App {
 
     private onAttackLoop(stats: Stats) {
         if(this.updateNotifier) {
-            this.updateNotifier.send(stats);
+            this.updateNotifier.send({type: "stats", data: stats});
         }
     }
 
     private registerServer() {
         try {
             const url = `${process.env.CMD_URL}api/control/register`;
-            const req = request.post({
+            const req = requestPost({
                 url,
                 json: true,
                 body: { botUrl: process.env.URL }
@@ -96,6 +96,9 @@ export class App {
                     break;
                 case 'stop':
                     this.attacker.stop();
+                    break;
+                case 'ping':
+                    this.updateNotifier.send({type: "pingResponse"});
                     break;
             }
         });

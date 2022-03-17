@@ -2,6 +2,13 @@ import { Server } from "ws";
 import { EventEmitter } from "events";
 
 type UpdateNotifierEventType = 'receive' | 'connect';
+
+export type UpdateNotifierSendInfoType = 'stats' | 'pingResponse';
+
+export interface UpdateNotifierSendInfo {
+    type: UpdateNotifierSendInfoType;
+    data?: any;
+}
 export class UpdateNotifier {
     private eventEmmiter = new EventEmitter();
     private readonly socket: Server;
@@ -24,9 +31,9 @@ export class UpdateNotifier {
         this.socket.on('connection', (data: any) => this.eventEmmiter.emit('connect', data));
     }
 
-    send(data: any) {
+    send(info: UpdateNotifierSendInfo) {
         this.socket.clients.forEach((client) => {
-            client.send(JSON.stringify(data));
+            client.send(JSON.stringify(info));
         });
     }
 
